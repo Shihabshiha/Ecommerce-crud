@@ -86,12 +86,21 @@ const cartController = () => {
     try{
       const { cartId } = req.params;
       const { productId } = req.body;
-      const cart = CartModel.findById(cartId);
+      const cart =await CartModel.findById(cartId);
       if(!cart){
         const err = new AppError("Cart not found", httpStatus.NOT_FOUND)
         return next(err)
       }
-      const updatedCart = await CartModel.updateOne({_id : cartId},{$pull:{products : {productId : productId}}})
+      const updatedCart = await CartModel.updateOne({_id : cartId},{$pull:{products : {productId : productId}}});
+      if(updatedCart.modifiedCount === 0 ){
+        const err = new AppError("Item removal failed", httpStatus.BAD_REQUEST)
+        return next(err)
+      }
+      console.log("cart",cart)
+      const deletedProduct = cart.products.filter((product)=> product.productId === productId);
+      const deletedCount = deletedProduct[0].quantity;
+      console.log("deleted count",deletedProduct,deletedCount)
+      await ProductModel.updateOne({productId},{$inc:{stock:+deletedCount}})
       res.status(httpStatus.OK).json({"message":"Item removed successfully" , updatedCart})
 
     }catch(error){
