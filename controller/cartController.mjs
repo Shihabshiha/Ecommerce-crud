@@ -9,7 +9,7 @@ const cartController = () => {
     try{
       const {userIp, productId , quantity } = req.body;
 
-      const product = await ProductModel.findOne({productId : productId});
+      const product = await ProductModel.findOne({productId});
       if(!product){
         const err = new AppError("Product not found", httpStatus.NOT_FOUND)
         return next(err)
@@ -20,24 +20,28 @@ const cartController = () => {
         return next(err)
       }
   
-      const cart = await CartModel.findOne({userIp:userIp});
+      const cart = await CartModel.findOne({userIp});
       if(!cart){
         const cartObject = {
           userIp : userIp,
           products : [{productId : product.productId , quantity:quantity, price:product.price}]
         }
         const newCart = await CartModel.create(cartObject)
-        res.status(httpStatus.CREATED).json({message : "product added successfully",newCart})
+        return res.status(httpStatus.CREATED).json({message : "product added successfully",newCart})
       }
       const existingProductInCartIndex = cart.products.findIndex((item)=> item.productId === productId)
   
       if(existingProductInCartIndex != -1){
         cart.products[existingProductInCartIndex].quantity += quantity;
       }else{
-        cart.products.push({productId : productId , quantity:quantity})
+        cart.products.push({productId : productId , quantity:quantity, price: product.price})
       }
   
-      await cart.save()
+      cart.save()
+
+      await ProductModel.updateOne({productId},{$inc:{stock:-quantity}})
+
+
       res.status(httpStatus.CREATED).json({"message":"Added to cart" , cart})
     }catch(error){
       console.error(error)

@@ -4,9 +4,13 @@ const schema = new mongoose.Schema({
   userIp : {
     type : String,
   },
-  products : {
-    type : Array,
-  },
+  products : [
+    {
+      productId: String,
+      quantity: Number,
+      price: Number
+    }
+  ],
   totalPrice : {
     type: Number,
   }
