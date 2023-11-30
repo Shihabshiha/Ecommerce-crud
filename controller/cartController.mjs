@@ -40,8 +40,6 @@ const cartController = () => {
       cart.save()
 
       await ProductModel.updateOne({productId},{$inc:{stock:-quantity}})
-
-
       res.status(httpStatus.CREATED).json({"message":"Added to cart" , cart})
     }catch(error){
       console.error(error)
@@ -65,9 +63,29 @@ const cartController = () => {
     }
   }
 
+  const totalCartPrice = async(req,res,next) => {
+    try{
+      const { cartId } = req.params;
+      console.log("cartid",cartId)
+      const cart =await CartModel.findById(cartId);
+      if(!cart){
+        const err = new AppError("Cart not found", httpStatus.NOT_FOUND)
+        return next(err)
+      }
+      const totalAmount = cart.products?.reduce((total,product)=>{
+        return total += product.quantity * product.price
+      },0) 
+      res.status(httpStatus.OK).json({"message":"total cart price",totalAmount})
+    }catch(error){
+      console.error(error)
+      res.status(httpStatus.INTERNAL_SERVER_ERROR).json({message : "Internal Server Error"})
+    }
+  }
+
   return {
     addToCart,
     viewCart,
+    totalCartPrice
   }
 
 }

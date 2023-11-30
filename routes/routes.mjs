@@ -9,6 +9,7 @@ const CartControllers = cartController()
 AppRouter.route('/product').post(Productscontroller.addProduct).get(Productscontroller.viewProducts)
 AppRouter.route('/add-to-cart').post(CartControllers.addToCart)
 AppRouter.route('/view-cart').get(CartControllers.viewCart)
+AppRouter.route('/total-cart-price/:cartId').get(CartControllers.totalCartPrice)
 
 export default AppRouter
 
