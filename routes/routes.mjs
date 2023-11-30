@@ -10,6 +10,7 @@ AppRouter.route('/product').post(Productscontroller.addProduct).get(Productscont
 AppRouter.route('/add-to-cart').post(CartControllers.addToCart)
 AppRouter.route('/view-cart').get(CartControllers.viewCart)
 AppRouter.route('/total-cart-price/:cartId').get(CartControllers.totalCartPrice)
+AppRouter.route('/delete-cart-items/:cartId').patch(CartControllers.deleteItemsFromCart)
 
 export default AppRouter
 

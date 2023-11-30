@@ -82,10 +82,29 @@ const cartController = () => {
     }
   }
 
+  const deleteItemsFromCart = async(req,res,next) => {
+    try{
+      const { cartId } = req.params;
+      const { productId } = req.body;
+      const cart = CartModel.findById(cartId);
+      if(!cart){
+        const err = new AppError("Cart not found", httpStatus.NOT_FOUND)
+        return next(err)
+      }
+      const updatedCart = await CartModel.updateOne({_id : cartId},{$pull:{products : {productId : productId}}})
+      res.status(httpStatus.OK).json({"message":"Item removed successfully" , updatedCart})
+
+    }catch(error){
+      console.error(error)
+      res.status(httpStatus.INTERNAL_SERVER_ERROR).json({message : "Internal Server Error"})
+    }
+  }
+
   return {
     addToCart,
     viewCart,
-    totalCartPrice
+    totalCartPrice,
+    deleteItemsFromCart,
   }
 
 }
